@@ -1,6 +1,8 @@
 #include <xc.h>
 #include <stdint.h>
 
+#include "Servo.h"
+
 #define PIN_SERVO 15
 #define CANTIDAD_AP 150
 
