@@ -46,15 +46,11 @@ void setTiempoConfigurado(uint32_t tiempo){
     } else {
         ticks = 0;
     }
-
     asm("ei"); 
 }
 
-
-
 void __attribute__((vector(20), interrupt(IPL5SOFT), nomips16)) InterrupcionTimer5(void) {
     IFS0bits.T5IF = 0;
-
     ticks++;
 
     if (ticks == int_12h || ticks == 2 * int_12h) { // Comidas Equiespaciadas
