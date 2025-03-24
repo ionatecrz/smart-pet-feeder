@@ -4,9 +4,11 @@
 #include "Pic32Ini.h"
 #include "Servo.h"
 #include "Mascota.h"
-
+#include "Uart.h"
 
 #define PIN_PULSADOR 5
+
+#define BAUDIOS 9600
 
 int main(void) {
     
@@ -23,6 +25,7 @@ int main(void) {
     
     InicializarTimers();
     InicializarServo();
+    InicializarUART1(BAUDIOS);
 
     INTCONbits.MVEC = 1; //Multivector
     asm("ei");

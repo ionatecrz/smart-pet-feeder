@@ -1,8 +1,7 @@
 #include <xc.h>
-#include "Pic32Ini.h"
-#include "mod_uart.h"
 
-//UART con Interrupciones y Colas
+#include "Pic32Ini.h"
+#include "Uart.h"
 
 #define TAM_COLA 100
 
@@ -87,8 +86,7 @@ char getcUART(void) {
     return c;
 }
 
-__attribute__((vector(32), interrupt(IPL3SOFT), nomips16))
-void InterrupcionUART1(void) {
+__attribute__((vector(32), interrupt(IPL3SOFT), nomips16)) void InterrupcionUART1(void) {
     if (IFS1bits.U1RXIF == 1) {
         if (!((cola_rx.icabeza + 1 == cola_rx.icola) ||
               (cola_rx.icabeza + 1 == TAM_COLA && cola_rx.icola == 0))) {
