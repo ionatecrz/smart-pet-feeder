@@ -5,6 +5,7 @@
 #include "Servo.h"
 #include "Mascota.h"
 #include "Uart.h"
+#include "Buzzer.h"
 
 #define PIN_PULSADOR 5
 
@@ -25,6 +26,7 @@ int main(void) {
     
     InicializarTimers();
     InicializarServo();
+    InicializarBuzzer();
     InicializarUART1(BAUDIOS);
 
     INTCONbits.MVEC = 1; //Multivector
@@ -38,6 +40,7 @@ int main(void) {
         pulsador_act = (PORTB >> PIN_PULSADOR) & 1;
         
         if (pulsador_act < pulsador_ant){
+            setAlarma(0);
             dispensar(getRacion());
         }
         
