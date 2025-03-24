@@ -4,6 +4,8 @@
 #include "Uart.h"
 
 #define TAM_COLA 100
+#define PIN_U1RX 13
+#define PIN_U1TX 7
 
 typedef struct {
     int icabeza;
@@ -12,9 +14,6 @@ typedef struct {
 } cola_t;
 
 static cola_t cola_tx, cola_rx;
-
-#define PIN_U1RX 13
-#define PIN_U1TX 7
 
 void InicializarUART1(int baudios) {
     ANSELB &= ~((1 << PIN_U1RX) | (1 << PIN_U1TX));
