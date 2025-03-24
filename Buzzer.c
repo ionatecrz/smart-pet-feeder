@@ -6,6 +6,7 @@
 #define PIN_BUZZER 5
 
 static uint8_t nivelAlarma = 0;
+static uint8_t alarmaActivada = 1;
 
 void InicializarBuzzer(void){
     
@@ -23,17 +24,30 @@ void InicializarBuzzer(void){
     
 }
 
-void setAlarma(uint8_t intensidad) {
+void incrementarAlarma() {
+    nivelAlarma++;
+    if (nivelAlarma > 3) {
+        nivelAlarma = 3;
+    }
+    establecerNivel();
+}
 
-    nivelAlarma = intensidad;
+void encenderAlarma() {
+    alarmaActivada = 1;
+    establecerNivel();
+}
 
-    if (!nivelAlarma) {
+void apagarAlarma() {
+    alarmaActivada = 0;
+    establecerNivel();
+}
+
+
+void establecerNivel(){
+    if (alarmaActivada){
+        OC1RS = nivelAlarma*1250;
+    } else {
         OC1RS = 0;
-    } else if (nivelAlarma==1) {
-        OC1RS = 1250; // 25% duty cycle
-    } else if (nivelAlarma==2) {
-        OC1RS = 2500; // 50% duty cycle
-    } else if (nivelAlarma==3) {
-        OC1RS = 3750; // 75% duty cycle
     }
 }
+
