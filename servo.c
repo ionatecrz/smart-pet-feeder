@@ -55,5 +55,5 @@ void dispensar(uint32_t cantidad){
 
 
 uint32_t getTiempo(uint32_t cantidad){
-    return cantidad // Calular la relacion entre comda y tiempo quitando el tiempo inicial y final de cerrar la valvula
+    return cantidad // Calular la relacion entre comida y tiempo quitando el tiempo inicial y final de abrir/cerrar la valvula
 }

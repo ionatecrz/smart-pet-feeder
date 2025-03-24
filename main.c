@@ -21,7 +21,11 @@ int main(void) {
     LATB = 0;
     LATC = 0xF;
     
+    InicializarTimers();
     InicializarServo();
+
+    INTCONbits.MVEC = 1; //Multivector
+    asm("ei");
 
     int pulsador_ant = (PORTB >> PIN_PULSADOR) & 1;
     int pulsador_act;
