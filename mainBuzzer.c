@@ -20,8 +20,7 @@ int duracion[] = {
     300, 300, 300, 300, 300, 300, 300, 1000
 };
 
-int main(void)
-{
+int main(void){
     int pulsador_ant, pulsador_act, note = 0, suena = 0;
 
     initBuzzer();
@@ -31,8 +30,7 @@ int main(void)
 
     pulsador_ant = (PORTB >> PIN_PULSADOR) & 1;
 
-    while (1)
-    {
+    while (1){
         pulsador_act = (PORTB >> PIN_PULSADOR) & 1;
 
         if ((pulsador_act != pulsador_ant) && (pulsador_act == 0))

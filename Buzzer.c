@@ -5,8 +5,7 @@
 
 static int ms = 0;
 
-void initBuzzer(void)
-{
+void initBuzzer(void){
     LATA = 0;
     LATB = 0;
     LATC = 0xF;
@@ -17,7 +16,7 @@ void initBuzzer(void)
 
     SYSKEY = 0xAA996655;
     SYSKEY = 0x556699AA;
-    RPB15R = 5; // OC1 → RA8
+    RPB15R = 5; // OC1 a RB15
     SYSKEY = 0x1CA11CA1;
 
     T4CON = 0;
@@ -29,14 +28,12 @@ void initBuzzer(void)
     IPC4bits.T4IS = 3;
 }
 
-void __attribute__((vector(16), interrupt(IPL7SOFT), nomips16))InterrupcionTimer4(void)
-{
+void __attribute__((vector(16), interrupt(IPL7SOFT), nomips16))InterrupcionTimer4(void){
     IFS0bits.T4IF = 0;
     ms++;
 }
 
-int GetMilis(void)
-{
+int GetMilis(void){
     int copia_ms;
     asm("di");
     copia_ms = ms;
@@ -44,22 +41,17 @@ int GetMilis(void)
     return copia_ms;
 }
 
-void resetMilis(void)
-{
+void resetMilis(void){
     asm("di");
     ms = 0;
     asm("ei");
 }
 
-void setNota(int f_nota)
-{
+void setNota(int f_nota){
     int pr3_c;
-
     T3CON = 0;
     OC1CON = 0;
-
-    if (f_nota != SILENCIO)
-    {
+    if (f_nota != SILENCIO){
         pr3_c = 5000000 / f_nota - 1;
         OC1R = pr3_c / 2;
         OC1RS = pr3_c / 2;
