@@ -48,9 +48,11 @@ uint32_t getGrados(void){
 }
 
 void dispensar(uint32_t cantidad){
-    OC1RS = 5000; 
-    //Retardo(getTiempo(uint32_t cantidad));
-    OC1RS = 2500;
+    if(OC1RS == 5000){
+        OC1RS = 2500;
+    }else{
+        OC1RS = 5000;
+    } 
 }
 
 
