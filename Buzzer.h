@@ -5,7 +5,6 @@
 
 void InicializarBuzzer();
 void incrementarAlarma();
-void encenderAlarma();
-void apagarAlarma();
+void alternarAlarma();
 
 #endif

@@ -32,13 +32,8 @@ void incrementarAlarma() {
     establecerNivel();
 }
 
-void encenderAlarma() {
-    alarmaActivada = 1;
-    establecerNivel();
-}
-
-void apagarAlarma() {
-    alarmaActivada = 0;
+void alternarAlarma() {
+    alarmaActivada ^= 1;
     establecerNivel();
 }
 
