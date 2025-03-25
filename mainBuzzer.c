@@ -1,6 +1,6 @@
 #include <xc.h>
 #include "Pic32Ini.h"
-#include "Buzzer2.h"
+#include "Buzzer.h"
 #include <stdint.h>
 
 #define PIN_PULSADOR 5
@@ -43,12 +43,12 @@ int main(void)
                 resetMilis();
                 note = 0;
                 setNota(partitura[note]);
-                T2CON |= 0x8000;
+                T4CON |= 0x8000;
             }
             else
             {
                 T3CON = 0;
-                T2CON = 0;
+                T4CON = 0;
                 OC1CON = 0;
             }
         }

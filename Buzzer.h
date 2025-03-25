@@ -1,5 +1,5 @@
-#ifndef BUZZER2_H
-#define BUZZER2_H
+#ifndef BUZZER_H
+#define BUZZER_H
 
 #define DO 262
 #define RE 294

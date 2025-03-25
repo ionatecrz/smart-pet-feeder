@@ -20,19 +20,18 @@ void initBuzzer(void)
     RPB15R = 5; // OC1 → RA8
     SYSKEY = 0x1CA11CA1;
 
-    T2CON = 0;
-    TMR2 = 0;
-    PR2 = 4999; // 1ms con Fpb = 5MHz
-    IFS0bits.T2IF = 0;
-    IEC0bits.T2IE = 1;
-    IPC2bits.T2IP = 7;
-    IPC2bits.T2IS = 3;
+    T4CON = 0;
+    TMR4 = 0;
+    PR4 = 4999; // 1ms con Fpb = 5MHz
+    IFS0bits.T4IF = 0;
+    IEC0bits.T4IE = 1;
+    IPC4bits.T4IP = 7;
+    IPC4bits.T4IS = 3;
 }
 
-void __attribute__((vector(8), interrupt(IPL7SOFT), nomips16))
-InterrupcionTimer2(void)
+void __attribute__((vector(16), interrupt(IPL7SOFT), nomips16))InterrupcionTimer4(void)
 {
-    IFS0bits.T2IF = 0;
+    IFS0bits.T4IF = 0;
     ms++;
 }
 
