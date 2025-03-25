@@ -4,17 +4,26 @@
 #include <stdint.h>
 
 #define PIN_PULSADOR 5
-#define LONGITUD 18
+#define LONGITUD 48
 
 int partitura[] = {
-    DO, RE, MI, FA, SOL, LA, SI, DO_M, SILENCIO,
-    DO_M, SI, LA, SOL, FA, MI, RE, DO, SILENCIO
+    DO, DO, SOL, SOL, LA, LA, SOL, SILENCIO,
+    FA, FA, MI, MI, RE, RE, DO, SILENCIO,
+    SOL, SOL, FA, FA, MI, MI, RE, SILENCIO,
+    SOL, SOL, FA, FA, MI, MI, RE, SILENCIO,
+    DO, DO, SOL, SOL, LA, LA, SOL, SILENCIO,
+    FA, FA, MI, MI, RE, RE, DO, SILENCIO
 };
 
 int duracion[] = {
-    500, 500, 500, 500, 500, 500, 500, 500, 250,
-    500, 500, 500, 500, 500, 500, 500, 500, 1000
+    400, 400, 400, 400, 400, 400, 800, 200,
+    400, 400, 400, 400, 400, 400, 800, 200,
+    400, 400, 400, 400, 400, 400, 800, 200,
+    400, 400, 400, 400, 400, 400, 800, 200,
+    400, 400, 400, 400, 400, 400, 800, 200,
+    400, 400, 400, 400, 400, 400, 800, 1000
 };
+
 
 int main(void)
 {
