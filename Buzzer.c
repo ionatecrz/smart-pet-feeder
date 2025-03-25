@@ -34,6 +34,9 @@ void incrementarAlarma() {
 
 void alternarAlarma() {
     alarmaActivada ^= 1;
+    if (!alarmaActivada) {
+        nivelAlarma = 0;
+    }
     establecerNivel();
 }
 
