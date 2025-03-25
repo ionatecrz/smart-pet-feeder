@@ -17,7 +17,7 @@ void initBuzzer(void)
 
     SYSKEY = 0xAA996655;
     SYSKEY = 0x556699AA;
-    RPA8R = 5; // OC1 → RA8
+    RPB15R = 5; // OC1 → RA8
     SYSKEY = 0x1CA11CA1;
 
     T2CON = 0;
@@ -25,8 +25,8 @@ void initBuzzer(void)
     PR2 = 4999; // 1ms con Fpb = 5MHz
     IFS0bits.T2IF = 0;
     IEC0bits.T2IE = 1;
-    IPC1bits.T2IP = 7;
-    IPC1bits.T2IS = 3;
+    IPC2bits.T2IP = 7;
+    IPC2bits.T2IS = 3;
 }
 
 void __attribute__((vector(8), interrupt(IPL7SOFT), nomips16))
