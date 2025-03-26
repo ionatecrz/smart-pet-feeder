@@ -4,23 +4,24 @@
 #include <stdint.h>
 
 #define PIN_PULSADOR 5
-#define LONGITUD 32
+#define LONGITUD 26
 
 int partitura[] = {
-    MI, FA, SOL, LA, SOL, FA, MI, RE, 
-    DO, RE, MI, FA, MI, RE, DO, SILENCIO,
-    DO, RE, MI, FA, SOL, LA, SI, DO_M,
-    DO_M, SI, LA, SOL, FA, MI, RE, DO
+    MI, SOL, LA, SOL, MI, SILENCIO,
+    MI, SOL, LA, SOL, MI, SILENCIO,
+    SOL, LA, SI, DO_M, SI, LA, SOL, SILENCIO,
+    MI, SOL, LA, SOL, MI, SILENCIO
 };
 
 int duracion[] = {
-    300, 300, 300, 300, 300, 300, 300, 300,
-    300, 300, 300, 300, 300, 300, 600, 200,
-    300, 300, 300, 300, 300, 300, 300, 600,
-    300, 300, 300, 300, 300, 300, 300, 1000
+    400, 400, 400, 400, 400, 200,
+    400, 400, 400, 400, 400, 200,
+    400, 400, 400, 400, 400, 400, 800, 200,
+    400, 400, 400, 400, 400, 1000
 };
 
-int main(void){
+int main(void)
+{
     int pulsador_ant, pulsador_act, note = 0, suena = 0;
 
     initBuzzer();
@@ -30,7 +31,8 @@ int main(void){
 
     pulsador_ant = (PORTB >> PIN_PULSADOR) & 1;
 
-    while (1){
+    while (1)
+    {
         pulsador_act = (PORTB >> PIN_PULSADOR) & 1;
 
         if ((pulsador_act != pulsador_ant) && (pulsador_act == 0))
@@ -41,12 +43,12 @@ int main(void){
                 resetMilis();
                 note = 0;
                 setNota(partitura[note]);
-                T4CON |= 0x8000;
+                T3CON |= 0x8000;
             }
             else
             {
-                T3CON = 0;
                 T4CON = 0;
+                T3CON = 0;
                 OC1CON = 0;
             }
         }
