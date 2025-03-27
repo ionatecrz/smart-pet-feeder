@@ -5,4 +5,15 @@ void InicializarUART1(int baudios);
 void putsUART(char s[]);
 char getcUART(void);
 
-#endif 
+int hayNuevoPeso(void);
+int getPesoUART(void);
+
+int hayPrimeraHoraNueva(void);
+int getHoraPrimera(void);
+int getMinPrimera(void);
+
+int haySegundaHoraNueva(void);
+int getHoraSegunda(void);
+int getMinSegunda(void);
+
+#endif
