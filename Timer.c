@@ -2,13 +2,13 @@
 #include "Pic32Ini.h"
 #include "Timer.h"
 
-void initTimer(void){
+void InicializarTimer(void){
 
     T1CON = 0;
     TMR1 = 0;
     PR1 = 4999; //Valor para 1 ms
-    IPC2bits.T1IP = 2;  
-    IPC2bits.T1IS = 0; 
+    IPC1bits.T1IP = 2;  
+    IPC1bits.T1IS = 0; 
     IFS0bits.T1IF = 0; 
     IEC0bits.T1IE = 1; 
     T1CON = 0x8000;
