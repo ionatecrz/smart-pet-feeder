@@ -1,12 +1,14 @@
 #include <xc.h>
-#include "Pic32Ini.h"
-#include "Timer.h"
+
+static int ms = 0;
+static int s = 0;
+static int min = 0;
+static int h = 0;
 
 void InicializarTimer(void){
-
     T1CON = 0;
     TMR1 = 0;
-    PR1 = 4999; //Valor para 1 ms
+    PR1 = 4999; 
     IPC1bits.T1IP = 2;  
     IPC1bits.T1IS = 0; 
     IFS0bits.T1IF = 0; 
@@ -15,15 +17,10 @@ void InicializarTimer(void){
 
     INTCONbits.MVEC = 1; 
     asm("ei"); 
-
 }
 
 void __attribute__((vector(4), interrupt(IPL2SOFT), nomips16)) InterrupcionTimer1(void){
     IFS0bits.T1IF = 0;    
-    static int ms = 0;
-    static int s = 0;
-    static int min = 0;
-    static int h = 0;
 
     ms++;
     if (ms == 1000){
@@ -41,4 +38,20 @@ void __attribute__((vector(4), interrupt(IPL2SOFT), nomips16)) InterrupcionTimer
     if (h == 24){
         h = 0;
     }
+}
+
+int getHoraActual(void){
+    int copia;
+    asm("di");
+    copia = h;
+    asm("ei");
+    return copia;
+}
+
+int getMinutoActual(void){
+    int copia;
+    asm("di");
+    copia = min;
+    asm("ei");
+    return copia;
 }
