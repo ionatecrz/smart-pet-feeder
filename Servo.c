@@ -1,12 +1,13 @@
 #include <xc.h>
 #include <stdint.h>
 
+#include "Retardo.h"
 #include "Servo.h"
 
 #define PIN_SERVO 15
 #define CANTIDAD_AP 150
 
-uint32_t t_alto = 2500;
+uint32_t t_alto = 1250;
 
 void InicializarServo(void){
     
@@ -18,8 +19,8 @@ void InicializarServo(void){
     SYSKEY = 0x1CA11CA1;
     
     OC1CON = 0;
-    OC1R = 2500; // Tiempo en alto de 0,5 ms inicial
-    OC1RS = 2500;
+    OC1R = 1250; // Tiempo en alto de 0,5 ms inicial
+    OC1RS = 1250;
     OC1CON = 0x8006; // OC ON, modo PWM sin faltas
     
     T2CON = 0;
@@ -47,15 +48,15 @@ uint32_t getGrados(void){
     return t_alto*0.072-270;
 }
 
-void dispensar(uint32_t cantidad){
-    if(OC1RS == 5000){
-        OC1RS = 2500;
-    }else{
-        OC1RS = 5000;
-    } 
-}
-
-
 uint32_t getTiempo(uint32_t cantidad){
-    return cantidad; // Calular la relacion entre comida y tiempo quitando el tiempo inicial y final de abrir/cerrar la valvula
+    return 1000*cantidad/23; // 23 g/s
 }
+
+void dispensar(uint32_t cantidad){
+    OC1RS = 5000;
+    Retardo(getTiempo(cantidad));
+    OC1RS = 2500;
+    
+}
+
+

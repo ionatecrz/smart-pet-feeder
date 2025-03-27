@@ -18,7 +18,6 @@ void InicializarTimer(void){
 
 }
 
-//Rutina de Interrupcion del Timer 1
 void __attribute__((vector(4), interrupt(IPL2SOFT), nomips16)) InterrupcionTimer1(void){
     IFS0bits.T1IF = 0;    
     static int ms = 0;

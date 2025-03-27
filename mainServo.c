@@ -27,7 +27,7 @@ int main(void) {
         pulsador_act = (PORTB >> PIN_PULSADOR) & 1;
         
         if (pulsador_act < pulsador_ant){
-            dispensar(0);
+            dispensar(46);
         }
         
         pulsador_ant = pulsador_act;
