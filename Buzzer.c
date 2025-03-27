@@ -2,11 +2,27 @@
 #include "Buzzer.h"
 
 #define PIN_PULSADOR 5
+#define LONGITUD 26
 
 static int ms = 0;
+static int note = 0;
+static int suena = 0;
 
-void initBuzzer(void)
-{
+static const int partitura[LONGITUD] = {
+    MI, SOL, LA, SOL, MI, SILENCIO,
+    MI, SOL, LA, SOL, MI, SILENCIO,
+    SOL, LA, SI, DO_M, SI, LA, SOL, SILENCIO,
+    MI, SOL, LA, SOL, MI, SILENCIO
+};
+
+static const int duracion[LONGITUD] = {
+    400, 400, 400, 400, 400, 200,
+    400, 400, 400, 400, 400, 200,
+    400, 400, 400, 400, 400, 400, 800, 200,
+    400, 400, 400, 400, 400, 1000
+};
+
+void InicializarBuzzer(void) {
     LATA = 0;
     LATB = 0;
     LATC = 0xF;
@@ -17,25 +33,25 @@ void initBuzzer(void)
 
     SYSKEY = 0xAA996655;
     SYSKEY = 0x556699AA;
-    RPB15R = 5; // OC1 → RB15
+    RPB15R = 5;
     SYSKEY = 0x1CA11CA1;
 
     T4CON = 0;
     TMR4 = 0;
-    PR4 = 4999; // 1ms con Fpb = 5MHz
+    PR4 = 4999;
     IFS0bits.T4IF = 0;
     IEC0bits.T4IE = 1;
     IPC4bits.T4IP = 7;
     IPC4bits.T4IS = 3;
 }
 
-void __attribute__((vector(16), interrupt(IPL7SOFT), nomips16))InterrupcionTimer4(void){
-    IFS0bits.T4IF = 0;
-    ms++;
+static void resetMilis(void) {
+    asm("di");
+    ms = 0;
+    asm("ei");
 }
 
-int GetMilis(void)
-{
+static int GetMilis(void) {
     int copia_ms;
     asm("di");
     copia_ms = ms;
@@ -43,22 +59,13 @@ int GetMilis(void)
     return copia_ms;
 }
 
-void resetMilis(void)
-{
-    asm("di");
-    ms = 0;
-    asm("ei");
-}
-
-void setNota(int f_nota)
-{
+static void setNota(int f_nota) {
     int pr3_c;
 
     T3CON = 0;
     OC1CON = 0;
 
-    if (f_nota != SILENCIO)
-    {
+    if (f_nota != SILENCIO) {
         pr3_c = 5000000 / f_nota - 1;
         OC1R = pr3_c / 2;
         OC1RS = pr3_c / 2;
@@ -66,5 +73,33 @@ void setNota(int f_nota)
         PR3 = pr3_c;
         OC1CON = 0x800E;
         T3CON = 0x8000;
+    }
+}
+
+void reproducirMelodia(void) {
+    resetMilis();
+    note = 0;
+    setNota(partitura[note]);
+    suena = 1;
+    T4CON |= 0x8000;
+}
+
+void pararMelodia(void) {
+    T3CON = 0;
+    T4CON = 0;
+    OC1CON = 0;
+    suena = 0;
+}
+
+void __attribute__((vector(16), interrupt(IPL7SOFT), nomips16)) InterrupcionTimer4(void) {
+    IFS0bits.T4IF = 0;
+    ms++;
+
+    if (suena && GetMilis() >= duracion[note]) {
+        resetMilis();
+        note++;
+        if (note >= LONGITUD)
+            note = 0;
+        setNota(partitura[note]);
     }
 }

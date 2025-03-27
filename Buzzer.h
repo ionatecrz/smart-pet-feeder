@@ -11,9 +11,8 @@
 #define DO_M 523
 #define SILENCIO 1
 
-void initBuzzer(void);
-int GetMilis(void);
-void resetMilis(void);
-void setNota(int f_nota);
+void InicializarBuzzer(void);
+void reproducirMelodia(void);
+void pararMelodia(void);
 
 #endif
