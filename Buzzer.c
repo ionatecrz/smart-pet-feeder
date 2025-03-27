@@ -20,19 +20,17 @@ void initBuzzer(void)
     RPB15R = 5; // OC1 → RB15
     SYSKEY = 0x1CA11CA1;
 
-    T3CON = 0;
-    TMR3 = 0;
-    PR3 = 4999; // 1ms con Fpb = 5MHz
-    IFS0bits.T3IF = 0;
-    IEC0bits.T3IE = 1;
-    IPC3bits.T3IP = 7;
-    IPC3bits.T3IS = 3;
+    T4CON = 0;
+    TMR4 = 0;
+    PR4 = 4999; // 1ms con Fpb = 5MHz
+    IFS0bits.T4IF = 0;
+    IEC0bits.T4IE = 1;
+    IPC4bits.T4IP = 7;
+    IPC4bits.T4IS = 3;
 }
 
-void __attribute__((vector(12), interrupt(IPL7SOFT), nomips16))
-InterrupcionTimer3(void)
-{
-    IFS0bits.T3IF = 0;
+void __attribute__((vector(16), interrupt(IPL7SOFT), nomips16))InterrupcionTimer4(void){
+    IFS0bits.T4IF = 0;
     ms++;
 }
 
@@ -54,19 +52,19 @@ void resetMilis(void)
 
 void setNota(int f_nota)
 {
-    int pr4_c;
+    int pr3_c;
 
-    T4CON = 0;
+    T3CON = 0;
     OC1CON = 0;
 
     if (f_nota != SILENCIO)
     {
-        pr4_c = 5000000 / f_nota - 1;
-        OC1R = pr4_c / 2;
-        OC1RS = pr4_c / 2;
-        TMR4 = 0;
-        PR4 = pr4_c;
+        pr3_c = 5000000 / f_nota - 1;
+        OC1R = pr3_c / 2;
+        OC1RS = pr3_c / 2;
+        TMR3 = 0;
+        PR3 = pr3_c;
         OC1CON = 0x800E;
-        T4CON = 0x8000;
+        T3CON = 0x8000;
     }
 }

@@ -43,12 +43,12 @@ int main(void)
                 resetMilis();
                 note = 0;
                 setNota(partitura[note]);
-                T3CON |= 0x8000;
+                T4CON |= 0x8000;
             }
             else
             {
-                T4CON = 0;
                 T3CON = 0;
+                T4CON = 0;
                 OC1CON = 0;
             }
         }
