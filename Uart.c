@@ -3,8 +3,9 @@
 #include <string.h>
 #include "Pic32Ini.h"
 #include "Uart.h"
+#include "Mascota.h"
 
-#define TAM_COLA 100
+#define TAM_COLA 200
 #define PIN_U1RX 13
 #define PIN_U1TX 7
 #define MAX_MENSAJE 30
@@ -93,6 +94,45 @@ char getcUART(void) {
     return c;
 }
 
+void enviarConfiguracionUART(void) {
+    char mensaje[64];
+    uint32_t peso_actual = getPeso();
+    uint32_t racion_actual = getRacion()*2;
+
+    sprintf(mensaje, "----- CONFIGURACION ACTUAL -----\n\r");
+    putsUART(mensaje);
+
+    sprintf(mensaje, "Peso configurado: %lu kg\n\r", peso_actual);
+    putsUART(mensaje);
+
+    sprintf(mensaje, "Racion diaria: %lu g\n\r", racion_actual);
+    putsUART(mensaje);
+
+    if (hora1 >= 0 && min1 >= 0) {
+        sprintf(mensaje, "Primera comida: %02d:%02d\n\r", hora1, min1);
+        putsUART(mensaje);
+    } else {
+        sprintf(mensaje, "Primera comida: No programada\n\r");
+        putsUART(mensaje);
+    }
+
+    if (hora2 >= 0 && min2 >= 0) {
+        sprintf(mensaje, "Segunda comida: %02d:%02d\n\r", hora2, min2);
+        putsUART(mensaje);
+    } else {
+        sprintf(mensaje, "Segunda comida: No programada\n\r");
+        putsUART(mensaje);
+    }
+
+
+    sprintf(mensaje, "--------------------------------\n\r");
+    putsUART(mensaje);
+}
+
+void clearUart(void){
+    putsUART("\033[2J\033[H");
+}
+
 void __attribute__((vector(32), interrupt(IPL3SOFT), nomips16)) InterrupcionUART1(void) {
     if (IFS1bits.U1RXIF == 1) {
         char c = U1RXREG;
@@ -102,16 +142,18 @@ void __attribute__((vector(32), interrupt(IPL3SOFT), nomips16)) InterrupcionUART
             if (strncmp(buffer, "Peso:", 5) == 0) {
                 peso_uart = atoi(&buffer[5]);
                 nueva_config_peso = 1;
-            } else if (strncmp(buffer, "Primera Comida:", 16) == 0) {
-                int t = atoi(&buffer[16]);
+            } else if (strncmp(buffer, "Primera Comida:", 15) == 0) {
+                int t = atoi(&buffer[15]);
                 hora1 = t / 100;
                 min1 = t % 100;
                 nueva_hora1 = 1;
-            } else if (strncmp(buffer, "Segunda Comida:", 16) == 0) {
-                int t = atoi(&buffer[16]);
+            } else if (strncmp(buffer, "Segunda Comida:", 15) == 0) {
+                int t = atoi(&buffer[15]);
                 hora2 = t / 100;
                 min2 = t % 100;
                 nueva_hora2 = 1;
+            }else if (strncmp(buffer, "Mostrar Config", 14) == 0) {
+                enviarConfiguracionUART();
             }
             asm("ei");
             indice_buffer = 0;

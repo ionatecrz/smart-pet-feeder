@@ -16,4 +16,7 @@ int haySegundaHoraNueva(void);
 int getHoraSegunda(void);
 int getMinSegunda(void);
 
+void enviarConfiguracionUART(void);
+void clearUart(void);
+
 #endif
