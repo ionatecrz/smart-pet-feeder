@@ -7,7 +7,6 @@
 int main(void) {
     int pulsador_ant;
     int pulsador_act;
-    int suena = 0;
 
     InicializarBuzzer();
 
@@ -20,11 +19,7 @@ int main(void) {
         pulsador_act = (PORTB >> PIN_PULSADOR) & 1;
 
         if ((pulsador_act != pulsador_ant) && (pulsador_act == 0)) {
-            suena ^= 1;
-            if (suena)
-                reproducirMelodia();
-            else
-                pararMelodia();
+            reproducirMelodia();
         }
 
         pulsador_ant = pulsador_act;
