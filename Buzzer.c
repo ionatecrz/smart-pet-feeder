@@ -1,7 +1,7 @@
 #include <xc.h>
 #include "Buzzer.h"
 
-#define LONGITUD 26
+#define LONGITUD 36
 
 static int ms = 0;
 static int note = 0;

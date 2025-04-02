@@ -155,6 +155,8 @@ void __attribute__((vector(32), interrupt(IPL3SOFT), nomips16)) InterrupcionUART
                 nueva_hora2 = 1;
             }else if (strncmp(buffer, "Mostrar Config", 14) == 0) {
                 enviarConfiguracionUART();
+            }else if (strncmp(buffer, "clear", 5) == 0) {
+                clearUart(); 
             }
             asm("ei");
             indice_buffer = 0;

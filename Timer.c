@@ -55,3 +55,19 @@ int getMinutoActual(void){
     asm("ei");
     return copia;
 }
+
+int getSegundos(void) {
+    int copia;
+    asm("di");
+    copia = s;
+    asm("ei");
+    return copia;
+}
+
+int getMilisegundos(void) {
+    int copia;
+    asm("di");
+    copia = ms;
+    asm("ei");
+    return copia;
+}
