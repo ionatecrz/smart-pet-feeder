@@ -1,11 +1,11 @@
 #include <xc.h>
 #include <stdint.h>
 
-#include "Retardo.h"
 #include "Servo.h"
+#include "Timer.h"
 
 #define PIN_SERVO 9
-#define CANTIDAD_AP 150
+#define FACTOR  6/150
 
 uint32_t t_alto = 1250;
 
@@ -48,12 +48,17 @@ uint32_t getGrados(void){
 }
 
 uint32_t getTiempo(uint32_t cantidad){
-    return 1000 * cantidad / 23; // 23 g/s
+    return 1000 * cantidad * FACTOR / 6; // FACTOR*6 g/s
 }
 
 void dispensar(uint32_t cantidad){
     sumaAngulo(90);
-    //Retardo(getTiempo(cantidad));
-    Retardo(1000);
+
+    uint32_t inicio;
+    uint32_t ms_espera = getTiempo(cantidad);
+    inicio = getTiempoAbsoluto();
+
+    while ((getTiempoAbsoluto() - inicio) < ms_espera);
+
     sumaAngulo(-90);
 }

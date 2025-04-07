@@ -3,6 +3,7 @@
 
 #include "Pic32Ini.h"
 #include "Servo.h"
+#include "Timer.h"
 
 #define PIN_PULSADOR 5
 
@@ -17,6 +18,7 @@ int main(void) {
     LATB = 0;
     LATC = 0xF;
     
+    InicializarTimer();
     InicializarServo();
 
     int pulsador_ant = (PORTB >> PIN_PULSADOR) & 1;
@@ -27,7 +29,7 @@ int main(void) {
         pulsador_act = (PORTB >> PIN_PULSADOR) & 1;
         
         if (pulsador_act < pulsador_ant){
-            dispensar(0);
+            dispensar(150);
         }
         
         pulsador_ant = pulsador_act;

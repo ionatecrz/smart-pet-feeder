@@ -71,3 +71,11 @@ int getMilisegundos(void) {
     asm("ei");
     return copia;
 }
+
+uint32_t getTiempoAbsoluto(void) {
+    uint32_t copia;
+    asm("di");
+    copia = s * 1000 + ms;
+    asm("ei");
+    return copia;
+}

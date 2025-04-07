@@ -12,8 +12,8 @@
 int main(void) {
     
     TRISA = 0;
-    TRISB = 1<<PIN_PULSADOR;
-    TRISC = 1<<PIN_INPUT;
+    TRISB = 1 << PIN_PULSADOR;
+    TRISC = 1 << PIN_INPUT;
     
     LATA = 0;
     LATB = 0;
@@ -29,19 +29,20 @@ int main(void) {
     InicializarBuzzer();
     InicializarServo();
     
-    int pulsador_ant = (PORTB>>PIN_PULSADOR) & 1;
+    clearUart();
+
+    int pulsador_ant = (PORTB >> PIN_PULSADOR) & 1;
     int pulsador_act;
-    
-    int estado_anterior = 0;
-    int estado_confirmado = 0;
-    int tiempo_cambio = -5;
-    
+
     int minuto_anterior = -1;
     int rutina1_ejecutada = 0;
     int rutina2_ejecutada = 0;
-    
-    clearUart();
 
+    // Inicialización correcta de estado al arrancar
+    int estado_actual = (PORTC >> PIN_INPUT) & 1;
+    int estado_anterior = estado_actual;
+    int estado_confirmado = estado_actual;
+    int tiempo_cambio = getSegundos();
 
     while (1) {
         if (hayNuevoPeso()) {
@@ -76,26 +77,28 @@ int main(void) {
         if (getHoraActual() == hora1 && minuto_actual == min1 && !rutina1_ejecutada) {
             putsUART("Hora de la primera comida!\n\r");
             reproducirMelodia();
+            dispensar(getRacion());
             rutina1_ejecutada = 1;
         }
 
         if (getHoraActual() == hora2 && minuto_actual == min2 && !rutina2_ejecutada) {
             putsUART("Hora de la segunda comida!\n\r");
             reproducirMelodia();
+            dispensar(getRacion());
             rutina2_ejecutada = 1;
         }
 
-        
-        pulsador_act = (PORTB>>PIN_PULSADOR) & 1;
-        
-        if (pulsador_act<pulsador_ant){
-            
+        // Detección de pulsador (dispensar manual)
+        pulsador_act = (PORTB >> PIN_PULSADOR) & 1;
+
+        if (pulsador_act < pulsador_ant) {
             reproducirMelodia();
         }
-        
-        int estado_actual = (PORTC >> PIN_INPUT) & 1;
+
+        // Detección de estado de comida con antirrebote y confirmación
+        estado_actual = (PORTC >> PIN_INPUT) & 1;
         int tiempo_actual = getSegundos();
-        
+
         if (estado_actual != estado_confirmado) {
             if (estado_actual != estado_anterior) {
                 tiempo_cambio = tiempo_actual;
@@ -108,13 +111,11 @@ int main(void) {
                 if (estado_confirmado == 1) {
                     putsUART("Ha parado de comer!!!\n\r");
                 } else {
-                    putsUART("Esta comiendo!!!\n\r");
+                    putsUART("Está comiendo!!!\n\r");
                 }
             }
         }
 
-        
-        
         pulsador_ant = pulsador_act;
     }
 }
