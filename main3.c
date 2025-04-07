@@ -16,7 +16,6 @@
 extern uint8_t SmallFont[];
 extern const unsigned short dog[];
 
-// Prototipos TFT
 void pause(void);
 void mostrarPerrito(void);
 void mostrarInicio(void);
@@ -25,7 +24,6 @@ void mostrarEstado(int peso);
 void animarDispensado(void);
 void mostrarAlerta(void);
 
-// Estados del sistema
 typedef enum {
     ESTADO_PANTALLA_BIENVENIDA,
     ESTADO_INICIO,
@@ -36,16 +34,14 @@ typedef enum {
 } EstadoSistema;
 
 int main(void) {
-    // Configuracion puertos
     TRISA = 0;
-    TRISB = 1<<PIN_PULSADOR;
-    TRISC = 1<<PIN_INPUT;
+    TRISB = 1 << PIN_PULSADOR;
+    TRISC = 1 << PIN_INPUT;
 
     LATA = 0;
     LATB = 0;
     LATC = 0xF;
 
-    // Inicializaciones
     inicializarTFT(LANDSCAPE);
     setFont(SmallFont);
     InicializarUART1(9600);
@@ -53,19 +49,19 @@ int main(void) {
     InicializarBuzzer();
     InicializarServo();
 
-    // Variables
     EstadoSistema estado_actual = ESTADO_PANTALLA_BIENVENIDA;
     int hora1 = -1, min1 = -1;
     int hora2 = -1, min2 = -1;
     int peso = -1;
     char buffer[64];
 
-    int pulsador_ant = (PORTB>>PIN_PULSADOR) & 1;
+    int pulsador_ant = (PORTB >> PIN_PULSADOR) & 1;
     int pulsador_act;
 
-    int estado_anterior = 0;
-    int estado_confirmado = 0;
-    int tiempo_cambio = -5;
+    int estado_actual_sensor = (PORTC >> PIN_INPUT) & 1;
+    int estado_anterior = estado_actual_sensor;
+    int estado_confirmado = estado_actual_sensor;
+    int tiempo_cambio = getSegundos();
 
     int minuto_anterior = -1;
     int rutina1_ejecutada = 0;
@@ -74,7 +70,6 @@ int main(void) {
     clearUart();
 
     while (1) {
-        // Actualizar datos del sistema
         if (hayNuevoPeso()) {
             peso = getPesoUART();
             setPeso(peso);
@@ -117,9 +112,8 @@ int main(void) {
             rutina2_ejecutada = 1;
         }
 
-        pulsador_act = (PORTB>>PIN_PULSADOR) & 1;
+        pulsador_act = (PORTB >> PIN_PULSADOR) & 1;
 
-        // Logica de estados
         switch (estado_actual) {
             case ESTADO_PANTALLA_BIENVENIDA:
                 mostrarPerrito();
@@ -139,7 +133,7 @@ int main(void) {
                 if (peso < 10) {
                     estado_actual = ESTADO_ALERTA;
                 } else {
-                    estado_actual = ESTADO_DISPENSAR; // por defecto
+                    estado_actual = ESTADO_DISPENSAR;
                 }
                 break;
 
@@ -162,8 +156,7 @@ int main(void) {
                 break;
         }
 
-        // Lectura de estado de consumo
-        int estado_actual_sensor = (PORTC >> PIN_INPUT) & 1;
+        estado_actual_sensor = (PORTC >> PIN_INPUT) & 1;
         int tiempo_actual = getSegundos();
 
         if (estado_actual_sensor != estado_confirmado) {
@@ -185,14 +178,12 @@ int main(void) {
     }
 }
 
-void pause(void)
-{
-    while(PORTB & (1<<PIN_PULSADOR));
-    while(!(PORTB & (1<<PIN_PULSADOR)));
+void pause(void) {
+    while (PORTB & (1 << PIN_PULSADOR));
+    while (!(PORTB & (1 << PIN_PULSADOR)));
 }
 
-void mostrarPerrito(void)
-{
+void mostrarPerrito(void) {
     clrScr();
     setColor(VGA_WHITE);
     print("Hola Perrito!", CENTER, 10, 0);
@@ -201,8 +192,7 @@ void mostrarPerrito(void)
     print("Es hora de comer!", CENTER, 100, 0);
 }
 
-void mostrarInicio(void)
-{
+void mostrarInicio(void) {
     clrScr();
     setColor(VGA_WHITE);
     print("Dispensador Canino", CENTER, 30, 0);
@@ -210,8 +200,7 @@ void mostrarInicio(void)
     print("Presiona RB5 para continuar", CENTER, 100, 0);
 }
 
-void mostrarMenu(void)
-{
+void mostrarMenu(void) {
     clrScr();
     setColor(VGA_RED);
     print("MENU PRINCIPAL", CENTER, 10, 0);
@@ -221,8 +210,7 @@ void mostrarMenu(void)
     print("3. Ver estado", LEFT, 80, 0);
 }
 
-void mostrarEstado(int peso)
-{
+void mostrarEstado(int peso) {
     clrScr();
     setColor(VGA_RED);
     print("Estado del sistema", CENTER, 10, 0);
@@ -234,22 +222,19 @@ void mostrarEstado(int peso)
     print("Modo: Automatico", LEFT, 80, 0);
 }
 
-void animarDispensado(void)
-{
+void animarDispensado(void) {
     clrScr();
     setColor(VGA_RED);
     print("Dispensando comida!", CENTER, 30, 0);
     setColor(VGA_GREEN);
-    for (int i = 0; i <= 100; i += 20)
-    {
+    for (int i = 0; i <= 100; i += 20) {
         fillRect(30, 70, 30 + i, 90);
     }
     setColor(VGA_WHITE);
     print("Listo! A comer", CENTER, 110, 0);
 }
 
-void mostrarAlerta(void)
-{
+void mostrarAlerta(void) {
     fillScr(VGA_RED);
     setColor(VGA_WHITE);
     print("Atencion!", CENTER, 30, 0);
