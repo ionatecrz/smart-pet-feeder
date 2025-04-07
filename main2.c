@@ -38,7 +38,6 @@ int main(void) {
     int rutina1_ejecutada = 0;
     int rutina2_ejecutada = 0;
 
-    // Inicialización correcta de estado al arrancar
     int estado_actual = (PORTC >> PIN_INPUT) & 1;
     int estado_anterior = estado_actual;
     int estado_confirmado = estado_actual;
@@ -88,14 +87,12 @@ int main(void) {
             rutina2_ejecutada = 1;
         }
 
-        // Detección de pulsador (dispensar manual)
         pulsador_act = (PORTB >> PIN_PULSADOR) & 1;
 
         if (pulsador_act < pulsador_ant) {
             reproducirMelodia();
         }
 
-        // Detección de estado de comida con antirrebote y confirmación
         estado_actual = (PORTC >> PIN_INPUT) & 1;
         int tiempo_actual = getSegundos();
 
@@ -111,7 +108,7 @@ int main(void) {
                 if (estado_confirmado == 1) {
                     putsUART("Ha parado de comer!!!\n\r");
                 } else {
-                    putsUART("Está comiendo!!!\n\r");
+                    putsUART("Esta comiendo!!!\n\r");
                 }
             }
         }
