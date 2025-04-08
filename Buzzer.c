@@ -1,7 +1,7 @@
 #include <xc.h>
 #include "Buzzer.h"
 
-#define LONGITUD 36
+#define LONGITUD 26
 
 static int ms = 0;
 static int note = 0;
@@ -32,7 +32,7 @@ void InicializarBuzzer(void) {
     PR4 = 4999;
     IFS0bits.T4IF = 0;
     IEC0bits.T4IE = 1;
-    IPC4bits.T4IP = 7;
+    IPC4bits.T4IP = 6;
     IPC4bits.T4IS = 3;
 }
 
@@ -75,7 +75,7 @@ void reproducirMelodia(void) {
     T4CON |= 0x8000;
 }
 
-void __attribute__((vector(16), interrupt(IPL7SOFT), nomips16)) InterrupcionTimer4(void) {
+void __attribute__((vector(16), interrupt(IPL6SOFT), nomips16)) InterrupcionTimer4(void) {
     IFS0bits.T4IF = 0;
     ms++;
 

@@ -9,7 +9,7 @@ void InicializarTimer(void){
     T1CON = 0;
     TMR1 = 0;
     PR1 = 4999; 
-    IPC1bits.T1IP = 2;  
+    IPC1bits.T1IP = 7;  
     IPC1bits.T1IS = 0; 
     IFS0bits.T1IF = 0; 
     IEC0bits.T1IE = 1; 
@@ -19,7 +19,7 @@ void InicializarTimer(void){
     asm("ei"); 
 }
 
-void __attribute__((vector(4), interrupt(IPL2SOFT), nomips16)) InterrupcionTimer1(void){
+void __attribute__((vector(4), interrupt(IPL7SOFT), nomips16)) InterrupcionTimer1(void){
     IFS0bits.T1IF = 0;    
 
     ms++;

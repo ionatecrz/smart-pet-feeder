@@ -1,9 +1,11 @@
 #include <xc.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "Pic32Ini.h"
 #include "Uart.h"
 #include "Mascota.h"
+#include "Timer.h"
 
 #define TAM_COLA 200
 #define PIN_U1RX 13
@@ -100,33 +102,33 @@ void enviarConfiguracionUART(void) {
     uint32_t peso_actual = getPeso();
     uint32_t racion_actual = getRacion()*2;
 
-    sprintf(mensaje, "----- CONFIGURACION ACTUAL -----\n\r");
+    sprintf(mensaje, "\n----- CONFIGURACION ACTUAL -----\n\r");
     putsUART(mensaje);
 
-    sprintf(mensaje, "Peso configurado: %lu kg\n\r", peso_actual);
+    sprintf(mensaje, " Peso configurado: %lu kg\n\r", peso_actual);
     putsUART(mensaje);
 
-    sprintf(mensaje, "Racion diaria: %lu g\n\r", racion_actual);
+    sprintf(mensaje, " Racion diaria: %lu g\n\r", racion_actual);
     putsUART(mensaje);
 
     if (hora1 >= 0 && min1 >= 0) {
-        sprintf(mensaje, "Primera comida: %02d:%02d\n\r", hora1, min1);
+        sprintf(mensaje, " Primera comida: %02d:%02d\n\r", hora1, min1);
         putsUART(mensaje);
     } else {
-        sprintf(mensaje, "Primera comida: No programada\n\r");
+        sprintf(mensaje, " Primera comida: No programada\n\r");
         putsUART(mensaje);
     }
 
     if (hora2 >= 0 && min2 >= 0) {
-        sprintf(mensaje, "Segunda comida: %02d:%02d\n\r", hora2, min2);
+        sprintf(mensaje, " Segunda comida: %02d:%02d\n\r", hora2, min2);
         putsUART(mensaje);
     } else {
-        sprintf(mensaje, "Segunda comida: No programada\n\r");
+        sprintf(mensaje, " Segunda comida: No programada\n\r");
         putsUART(mensaje);
     }
 
 
-    sprintf(mensaje, "--------------------------------\n\r");
+    sprintf(mensaje, "--------------------------------\n\r\n");
     putsUART(mensaje);
 }
 
@@ -137,6 +139,7 @@ void clearUart(void){
 void __attribute__((vector(32), interrupt(IPL3SOFT), nomips16)) InterrupcionUART1(void) {
     if (IFS1bits.U1RXIF == 1) {
         char c = U1RXREG;
+        char mensaje[64];
         if (c == '\n' || c == '\r') {
             buffer[indice_buffer] = '\0';
             asm("di");
@@ -155,7 +158,13 @@ void __attribute__((vector(32), interrupt(IPL3SOFT), nomips16)) InterrupcionUART
                 nueva_hora2 = 1;
             }else if (strncmp(buffer, "Mostrar Config", 14) == 0) {
                 enviarConfiguracionUART();
-            }else if (strncmp(buffer, "clear", 5) == 0) {
+            }else if (strncmp(buffer, "Hora", 4) == 0) {
+                int h = getHoraActual();
+                int m = getMinutoActual();
+                int s = getSegundos();
+                sprintf(mensaje, "Hora actual: %02d:%02d:%02d\n\r", h, m, s);
+                putsUART(mensaje);
+            } else if (strncmp(buffer, "clear", 5) == 0) {
                 clearUart(); 
             }
             asm("ei");
@@ -245,4 +254,16 @@ int getMinSegunda(void) {
     m = min2;
     asm("ei");
     return m;
+}
+
+
+void apagarUart(){
+    U1MODE &= ~(0x8000);
+    IEC1bits.U1RXIE = 0;  // Apaga interrupción RX
+    IEC1bits.U1TXIE = 0;  // Apaga interrupción TX
+}
+void encenderUart(){
+    U1MODE |= 0x8000;
+    IEC1bits.U1RXIE = 1;  // Apaga interrupción RX
+    IEC1bits.U1TXIE = 1;
 }

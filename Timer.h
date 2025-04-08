@@ -4,6 +4,8 @@
 void InicializarTimer(void);
 int getHoraActual(void);
 int getMinutoActual(void);
+int getSegundos(void);
+int getMilisegundos(void);
 uint32_t getTiempoAbsoluto(void);
 
 #endif

@@ -19,4 +19,7 @@ int getMinSegunda(void);
 void enviarConfiguracionUART(void);
 void clearUart(void);
 
+void apagarUart();
+void encenderUart();
+
 #endif

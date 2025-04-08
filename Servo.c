@@ -30,6 +30,14 @@ void InicializarServo(void){
     
 }
 
+void apagarServo(){
+    T2CON &= ~(0x8000);
+}
+
+void encenderServo(){
+    T2CON |= (0x8000);
+}
+
 void sumaAngulo(uint32_t grados){ 
     
     t_alto += grados / 0.036; 
