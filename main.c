@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+
 #include "Pic32Ini.h"
 #include "TftDriver/TftDriver.h"
 #include "Uart.h"
@@ -18,7 +19,6 @@ extern const unsigned short dog[];
 typedef enum {
     EST_BIENVENIDA,
     EST_INICIO,
-    EST_MENU,
     EST_DISPENSANDO,
     EST_ESTADO,
     EST_PERRITO  
@@ -26,7 +26,6 @@ typedef enum {
 
 void mostrarPerrito(void);
 void mostrarInicio(void);
-void mostrarMenu(void);
 void mostrarEstado(int peso, int racion, int h1, int m1, int h2, int m2);
 void animarDispensado(void);
 
@@ -54,17 +53,6 @@ int main(void) {
     InicializarServo();
     clearUart();
 
-    putsUART("\n>>> Sistema INICIADO <<<\n\r");
-
-    if (RCON & 0x01) putsUART("Reset por Power-on\n\r");
-    if (RCON & 0x02) putsUART("Reset por Brown-out (bajo voltaje)\n\r");
-    if (RCON & 0x04) putsUART("Reset por Watchdog Timer\n\r");
-    if (RCON & 0x08) putsUART("Reset por fallo en Sleep\n\r");
-    if (RCON & 0x10) putsUART("Reset por fallo en IDLE\n\r");
-    if (RCON & 0x20) putsUART("Reset por MCLR (pin de reset externo)\n\r");
-    if (RCON & 0x40) putsUART("Reset por Software (Soft reset)\n\r");
-    RCON = 0;
-
     int peso = getPeso();
     int racion = getRacion();
     int hora1 = -1, min1 = -1;
@@ -83,15 +71,29 @@ int main(void) {
     EstadoSistema estado = EST_BIENVENIDA;
     EstadoSistema estado_anterior_sistema = -1;
 
-    int mostrar_configuracion_temporal = 0;
-    uint32_t tiempo_inicio_config = 0;
+    int uart_habilitada = 0;
+    uint8_t sensor_habilitado = 0;
+    uint32_t tiempo_inicio_sistema = getTiempoAbsoluto();
+    uint32_t tiempo_inicio_estado_config = 0;
+    uint32_t tiempo_inicio_bienvenida = getTiempoAbsoluto();
+    uint8_t esperando_bienvenida = 1;
 
-    esperarMs(2000);
-    estado = EST_INICIO;
+    mostrarInicio();
 
     while (1) {
-        // ---------------- UART ----------------
-        if (hayNuevoPeso()) {
+        uint32_t ahora = getTiempoAbsoluto();
+
+        if (esperando_bienvenida && ahora - tiempo_inicio_bienvenida >= 2000) {
+            esperando_bienvenida = 0;
+            uart_habilitada = 1;
+            estado = EST_PERRITO;
+        }
+
+        if (estado == EST_ESTADO && ahora - tiempo_inicio_estado_config >= 4000) {
+            estado = EST_PERRITO;
+        }
+
+        if (uart_habilitada && hayNuevoPeso()) {
             peso = getPesoUART();
             setPeso(peso);
             racion = getRacion();
@@ -99,38 +101,36 @@ int main(void) {
             putsUART(buffer_global);
 
             mostrarEstado(peso, racion, hora1, min1, hora2, min2);
-            mostrar_configuracion_temporal = 1;
-            tiempo_inicio_config = getTiempoAbsoluto();
+            estado = EST_ESTADO;
+            tiempo_inicio_estado_config = ahora;
         }
 
-        if (hayPrimeraHoraNueva()) {
+        if (uart_habilitada && hayPrimeraHoraNueva()) {
             hora1 = getHoraPrimera();
             min1 = getMinPrimera();
             sprintf(buffer_global, "Primera comida: %02d:%02d\n\r", hora1, min1);
             putsUART(buffer_global);
 
             mostrarEstado(peso, racion, hora1, min1, hora2, min2);
-            mostrar_configuracion_temporal = 1;
-            tiempo_inicio_config = getTiempoAbsoluto();
+            estado = EST_ESTADO;
+            tiempo_inicio_estado_config = ahora;
         }
 
-        if (haySegundaHoraNueva()) {
+        if (uart_habilitada && haySegundaHoraNueva()) {
             hora2 = getHoraSegunda();
             min2 = getMinSegunda();
             sprintf(buffer_global, "Segunda comida: %02d:%02d\n\r", hora2, min2);
             putsUART(buffer_global);
 
             mostrarEstado(peso, racion, hora1, min1, hora2, min2);
-            mostrar_configuracion_temporal = 1;
-            tiempo_inicio_config = getTiempoAbsoluto();
+            estado = EST_ESTADO;
+            tiempo_inicio_estado_config = ahora;
         }
 
-        if (mostrar_configuracion_temporal && (getTiempoAbsoluto() - tiempo_inicio_config >= 2000)) {
-            mostrar_configuracion_temporal = 0;
-            estado = EST_PERRITO;  
+        if (!sensor_habilitado && (ahora - tiempo_inicio_sistema > 5000)) {
+            sensor_habilitado = 1;
         }
 
- 
         int minuto_actual = getMinutoActual();
         if (minuto_actual != minuto_anterior) {
             rutina1_ejecutada = 0;
@@ -141,113 +141,94 @@ int main(void) {
         int hora_actual = getHoraActual();
 
         if (hora_actual == hora1 && minuto_actual == min1 && !rutina1_ejecutada) {
-            esperarMs(500);
             reproducirMelodia();
             dispensar(getRacion());
-            animarDispensado();
-            mostrarEstado(peso, racion, hora1, min1, hora2, min2);
-            rutina1_ejecutada = 1;
             estado = EST_DISPENSANDO;
+            rutina1_ejecutada = 1;
         }
 
         if (hora_actual == hora2 && minuto_actual == min2 && !rutina2_ejecutada) {
-            esperarMs(500);
             reproducirMelodia();
             dispensar(getRacion());
-            animarDispensado();
-            mostrarEstado(peso, racion, hora1, min1, hora2, min2);
-            rutina2_ejecutada = 1;
             estado = EST_DISPENSANDO;
+            rutina2_ejecutada = 1;
         }
 
+        if (sensor_habilitado) {
+            int lectura_estado = (PORTC >> PIN_INPUT) & 1;
+            int tiempo_actual = ahora / 1000;
 
-        int lectura_estado = (PORTC >> PIN_INPUT) & 1;
-        int tiempo_actual = getTiempoAbsoluto() / 1000;
+            if (lectura_estado != estado_confirmado) {
+                if (lectura_estado != estado_anterior) {
+                    tiempo_cambio = tiempo_actual;
+                    estado_anterior = lectura_estado;
+                }
 
-        if (lectura_estado != estado_confirmado) {
-            if (lectura_estado != estado_anterior) {
-                tiempo_cambio = tiempo_actual;
-                estado_anterior = lectura_estado;
-            }
-
-            if ((tiempo_actual - tiempo_cambio) >= 5) {
-                estado_confirmado = lectura_estado;
-
-                if (estado_confirmado == 1) {
-                    putsUART("Ha parado de comer!!!\n\r");
-                    mostrar_estado_comida = 1;
-                    estado = EST_ESTADO;
-                } else {
-                    putsUART("Está comiendo!!!\n\r");
+                if ((tiempo_actual - tiempo_cambio) >= 5) {
+                    estado_confirmado = lectura_estado;
+                    if (estado_confirmado == 1) {
+                        mostrar_estado_comida = 1;
+                    }
                 }
             }
         }
 
-
-        if (!mostrar_configuracion_temporal && estado != estado_anterior_sistema) {
+        if (estado != estado_anterior_sistema) {
             switch (estado) {
                 case EST_INICIO:
                     mostrarInicio();
-                    esperarMs(2000);
-                    estado = EST_PERRITO;
+                    tiempo_inicio_bienvenida = ahora;
+                    esperando_bienvenida = 1;
+                    estado_anterior_sistema = estado;
                     break;
-                case EST_MENU:
-                    mostrarMenu();
-                    break;
-                case EST_DISPENSANDO:
-                    esperarMs(1000);
-                    estado = EST_PERRITO;
-                    break;
+
                 case EST_ESTADO:
                     if (mostrar_estado_comida) {
                         mostrarEstado(peso, racion, hora1, min1, hora2, min2);
                         mostrar_estado_comida = 0;
-                        esperarMs(3000);
-                        estado = EST_PERRITO;
                     }
+                    estado_anterior_sistema = estado;
                     break;
+
+                case EST_DISPENSANDO:
+                    animarDispensado();
+                    estado = EST_PERRITO;
+                    estado_anterior_sistema = -1;
+                    break;
+
                 case EST_PERRITO:
                     mostrarPerrito();
+                    estado_anterior_sistema = estado;
                     break;
+
                 default:
                     break;
             }
-            estado_anterior_sistema = estado;
         }
     }
 }
 
 void mostrarPerrito(void){
-     clrScr();
-     setColor(VGA_WHITE);
-     print("Hola Perrito!", CENTER, 10, 0);
-     drawBitmap(48, 30, 64, 64, dog, 1);
-     setColor(VGA_RED);
-     print("Es hora de comer!", CENTER, 100, 0);
- }
+    clrScr();
+    setColor(VGA_WHITE);
+    print("Hola Perrito!", CENTER, 10, 0);
+    drawBitmap(48, 30, 64, 64, dog, 1);
+    setColor(VGA_RED);
+    print("Es hora de comer!", CENTER, 100, 0);
+}
 
 void mostrarInicio(void) {
     clrScr();
     setColor(VGA_WHITE);
     print("Dispensador Canino", CENTER, 30, 0);
     print("Inteligente", CENTER, 50, 0);
-    print("Inicilizando sistema...", CENTER, 100, 0);
-}
-
-void mostrarMenu(void) {
-    clrScr();
-    setColor(VGA_RED);
-    print("MENU PRINCIPAL", CENTER, 10, 0);
-    setColor(VGA_WHITE);
-    print("Modo: Automatico", LEFT, 40, 0);
-    print("Esperando señal...", LEFT, 60, 0);
+    print("Inicializando sistema...", CENTER, 100, 0);
 }
 
 void mostrarEstado(int peso, int racion, int h1, int m1, int h2, int m2) {
     clrScr();
     setColor(VGA_RED);
     print("CONFIGURACION ACTUAL", CENTER, 5, 0);
-
     setColor(VGA_WHITE);
 
     sprintf(buffer_global, "Peso: %d kg", peso);
@@ -269,15 +250,6 @@ void mostrarEstado(int peso, int racion, int h1, int m1, int h2, int m2) {
     print(buffer_global, LEFT, 90, 0);
 }
 
-void mostrarPerrito(void) {
-    clrScr();
-    setColor(VGA_WHITE);
-    print("Hola Perrito!", CENTER, 10, 0);
-    drawBitmap(48, 30, 64, 64, dog, 1);
-    setColor(VGA_RED);
-    print("Es hora de comer!", CENTER, 100, 0);
-}
-
 void animarDispensado(void) {
     clrScr();
     setColor(VGA_RED);
@@ -285,8 +257,9 @@ void animarDispensado(void) {
     setColor(VGA_GREEN);
     for (int i = 0; i <= 100; i += 20) {
         fillRect(30, 70, 30 + i, 90);
-        esperarMs(300);
+        esperarMs(500);
     }
     setColor(VGA_WHITE);
     print("Listo! A comer", CENTER, 110, 0);
+    esperarMs(1000);
 }
