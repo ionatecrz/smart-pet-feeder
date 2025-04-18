@@ -58,10 +58,6 @@ int main(void) {
     int hora1 = -1, min1 = -1;
     int hora2 = -1, min2 = -1;
 
-    int estado_anterior = 0;
-    int estado_confirmado = 0;
-    int tiempo_cambio = -5;
-
     int minuto_anterior = -1;
     int rutina1_ejecutada = 0;
     int rutina2_ejecutada = 0;
@@ -77,6 +73,17 @@ int main(void) {
     uint32_t tiempo_inicio_estado_config = 0;
     uint32_t tiempo_inicio_bienvenida = getTiempoAbsoluto();
     uint8_t esperando_bienvenida = 1;
+
+    int estado_confirmado = (PORTC >> PIN_INPUT) & 1;
+    int estado_en_evaluacion = -1;
+    uint32_t tiempo_cambio_ms = 0;
+    uint32_t umbral_antirrebote_ms = 3000;
+
+    if (estado_confirmado == 1) {
+        putsUART("Ha parado de comer!!!\n\r");
+    } else {
+        putsUART("Esta comiendo!!!\n\r");
+    }
 
     mostrarInicio();
 
@@ -156,20 +163,26 @@ int main(void) {
 
         if (sensor_habilitado) {
             int lectura_estado = (PORTC >> PIN_INPUT) & 1;
-            int tiempo_actual = ahora / 1000;
 
             if (lectura_estado != estado_confirmado) {
-                if (lectura_estado != estado_anterior) {
-                    tiempo_cambio = tiempo_actual;
-                    estado_anterior = lectura_estado;
-                }
+                if (lectura_estado != estado_en_evaluacion) {
+                    estado_en_evaluacion = lectura_estado;
+                    tiempo_cambio_ms = ahora;
+                } else {
+                    if ((ahora - tiempo_cambio_ms) >= umbral_antirrebote_ms) {
+                        estado_confirmado = lectura_estado;
+                        estado_en_evaluacion = -1;
 
-                if ((tiempo_actual - tiempo_cambio) >= 5) {
-                    estado_confirmado = lectura_estado;
-                    if (estado_confirmado == 1) {
-                        mostrar_estado_comida = 1;
+                        if (estado_confirmado == 1) {
+                            mostrar_estado_comida = 1;
+                            putsUART("Ha parado de comer!!!\n\r");
+                        } else {
+                            putsUART("Esta comiendo!!!\n\r");
+                        }
                     }
                 }
+            } else {
+                estado_en_evaluacion = -1; 
             }
         }
 
@@ -207,6 +220,7 @@ int main(void) {
         }
     }
 }
+
 
 void mostrarPerrito(void){
     clrScr();
